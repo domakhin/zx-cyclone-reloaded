@@ -1,0 +1,42 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+
+# User-supplied Spectrum dumps (do not commit copyrighted games)
+public/roms/**
+!public/roms/README.txt
+*.tap
+*.tzx
+*.z80
+*.sna
+*.szx
+!public/jsspeccy/**/*.rom
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# RE scratch / scan sweeps
+tools/map-previews/s*.pgm
+tools/map-previews/*.ppm
+tools/map-previews/*.pgm
+tools/map-previews/*.txt
+tools/_*_out.txt
+tools/_map_refs.txt

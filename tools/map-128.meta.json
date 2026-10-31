@@ -1,0 +1,406 @@
+{
+  "spectrumAddress": 37632,
+  "fileOffsetInCyclone3": 13092,
+  "width": 128,
+  "height": 128,
+  "size": 16384,
+  "endAddress": 54015,
+  "classes": {
+    "sea": 9431,
+    "land": 5895,
+    "structure": 1058
+  },
+  "byHeight": {
+    "0": 1202,
+    "1": 2735,
+    "2": 1724,
+    "3": 234,
+    "4": 915,
+    "5": 76,
+    "6": 42,
+    "7": 25
+  },
+  "byHiNibble": {
+    "0": 113,
+    "1": 1089,
+    "3": 2735,
+    "4": 47,
+    "5": 1677,
+    "6": 182,
+    "7": 52,
+    "8": 634,
+    "9": 281,
+    "10": 26,
+    "11": 50,
+    "12": 30,
+    "13": 12,
+    "14": 25
+  },
+  "encoding": {
+    "sea": "0",
+    "land": "1..127 — bits 7-5 = elevation (0-3 observed); high nibbles $1/$3/$5 dominate",
+    "structure": ">= $80 (bit7 set) — game tests CP $80 / JR C at $7e8b; high nibbles $8/$9 common",
+    "lowBits": "tile / edge variant within class (not fully mapped to graphics)"
+  },
+  "evidence": [
+    "LD HL,$9300 ; LD BC,$48 ; LDIR at $9260 (viewport strip from map base)",
+    "LD BC,$80 ; ADD HL,BC at $7846 and $79B3 (row stride 128)",
+    "7× ADD HL,HL sites (y<<7) at $776e, $7799, $f45a",
+    "LD A,(HL) ; CP $80 ; JR C at $7e8b — structure vs land/sea branch",
+    "Land present through row 127 → height 128"
+  ],
+  "structureClusters": [
+    {
+      "n": 230,
+      "minX": 21,
+      "maxX": 51,
+      "minY": 52,
+      "maxY": 65,
+      "cx": 38.4,
+      "cy": 57.4
+    },
+    {
+      "n": 94,
+      "minX": 2,
+      "maxX": 13,
+      "minY": 73,
+      "maxY": 87,
+      "cx": 6.7,
+      "cy": 78
+    },
+    {
+      "n": 85,
+      "minX": 21,
+      "maxX": 36,
+      "minY": 1,
+      "maxY": 10,
+      "cx": 28.1,
+      "cy": 5.1
+    },
+    {
+      "n": 77,
+      "minX": 71,
+      "maxX": 81,
+      "minY": 89,
+      "maxY": 97,
+      "cx": 75.6,
+      "cy": 93
+    },
+    {
+      "n": 69,
+      "minX": 117,
+      "maxX": 125,
+      "minY": 63,
+      "maxY": 73,
+      "cx": 121.1,
+      "cy": 68.6
+    },
+    {
+      "n": 55,
+      "minX": 56,
+      "maxX": 63,
+      "minY": 46,
+      "maxY": 55,
+      "cx": 59.1,
+      "cy": 49.6
+    },
+    {
+      "n": 51,
+      "minX": 84,
+      "maxX": 95,
+      "minY": 106,
+      "maxY": 116,
+      "cx": 89,
+      "cy": 111.4
+    },
+    {
+      "n": 47,
+      "minX": 91,
+      "maxX": 100,
+      "minY": 13,
+      "maxY": 19,
+      "cx": 96.4,
+      "cy": 16.4
+    },
+    {
+      "n": 42,
+      "minX": 114,
+      "maxX": 121,
+      "minY": 87,
+      "maxY": 93,
+      "cx": 117.4,
+      "cy": 89.6
+    },
+    {
+      "n": 42,
+      "minX": 56,
+      "maxX": 63,
+      "minY": 85,
+      "maxY": 93,
+      "cx": 59.6,
+      "cy": 90.4
+    },
+    {
+      "n": 35,
+      "minX": 6,
+      "maxX": 19,
+      "minY": 125,
+      "maxY": 127,
+      "cx": 13.2,
+      "cy": 126.2
+    },
+    {
+      "n": 33,
+      "minX": 13,
+      "maxX": 24,
+      "minY": 106,
+      "maxY": 110,
+      "cx": 18.1,
+      "cy": 107.6
+    },
+    {
+      "n": 33,
+      "minX": 64,
+      "maxX": 71,
+      "minY": 13,
+      "maxY": 18,
+      "cx": 67.6,
+      "cy": 15.2
+    },
+    {
+      "n": 15,
+      "minX": 58,
+      "maxX": 63,
+      "minY": 18,
+      "maxY": 24,
+      "cx": 61.4,
+      "cy": 21.3
+    },
+    {
+      "n": 13,
+      "minX": 71,
+      "maxX": 75,
+      "minY": 43,
+      "maxY": 48,
+      "cx": 72.8,
+      "cy": 45.1
+    },
+    {
+      "n": 13,
+      "minX": 95,
+      "maxX": 98,
+      "minY": 5,
+      "maxY": 8,
+      "cx": 96.6,
+      "cy": 6.8
+    },
+    {
+      "n": 12,
+      "minX": 85,
+      "maxX": 91,
+      "minY": 122,
+      "maxY": 125,
+      "cx": 88.2,
+      "cy": 123.2
+    },
+    {
+      "n": 8,
+      "minX": 66,
+      "maxX": 71,
+      "minY": 33,
+      "maxY": 34,
+      "cx": 69.1,
+      "cy": 33.4
+    },
+    {
+      "n": 8,
+      "minX": 76,
+      "maxX": 79,
+      "minY": 14,
+      "maxY": 16,
+      "cx": 77.5,
+      "cy": 15
+    },
+    {
+      "n": 8,
+      "minX": 103,
+      "maxX": 106,
+      "minY": 13,
+      "maxY": 14,
+      "cx": 104.5,
+      "cy": 13.5
+    },
+    {
+      "n": 7,
+      "minX": 57,
+      "maxX": 61,
+      "minY": 80,
+      "maxY": 82,
+      "cx": 58.4,
+      "cy": 80.7
+    },
+    {
+      "n": 7,
+      "minX": 105,
+      "maxX": 109,
+      "minY": 62,
+      "maxY": 65,
+      "cx": 107.6,
+      "cy": 64.1
+    },
+    {
+      "n": 7,
+      "minX": 115,
+      "maxX": 119,
+      "minY": 37,
+      "maxY": 40,
+      "cx": 116.4,
+      "cy": 39.1
+    },
+    {
+      "n": 6,
+      "minX": 112,
+      "maxX": 114,
+      "minY": 120,
+      "maxY": 121,
+      "cx": 113,
+      "cy": 120.5
+    },
+    {
+      "n": 6,
+      "minX": 67,
+      "maxX": 69,
+      "minY": 29,
+      "maxY": 30,
+      "cx": 68,
+      "cy": 29.5
+    }
+  ],
+  "separateObjectTables": {
+    "status": "not found in static scan",
+    "buildingsHelipads": "encoded in terrain as cells >= $80",
+    "cratesRefugees": "no unique land-coordinate table found before map; likely runtime-generated or alternate encoding — needs emulator watch"
+  },
+  "topBytes": [
+    {
+      "v": 0,
+      "hex": "$00",
+      "c": 9431,
+      "pct": 57.56
+    },
+    {
+      "v": 48,
+      "hex": "$30",
+      "c": 1625,
+      "pct": 9.92
+    },
+    {
+      "v": 88,
+      "hex": "$58",
+      "c": 976,
+      "pct": 5.96
+    },
+    {
+      "v": 16,
+      "hex": "$10",
+      "c": 687,
+      "pct": 4.19
+    },
+    {
+      "v": 140,
+      "hex": "$8c",
+      "c": 444,
+      "pct": 2.71
+    },
+    {
+      "v": 53,
+      "hex": "$35",
+      "c": 299,
+      "pct": 1.82
+    },
+    {
+      "v": 49,
+      "hex": "$31",
+      "c": 259,
+      "pct": 1.58
+    },
+    {
+      "v": 93,
+      "hex": "$5d",
+      "c": 222,
+      "pct": 1.35
+    },
+    {
+      "v": 89,
+      "hex": "$59",
+      "c": 214,
+      "pct": 1.31
+    },
+    {
+      "v": 51,
+      "hex": "$33",
+      "c": 148,
+      "pct": 0.9
+    },
+    {
+      "v": 55,
+      "hex": "$37",
+      "c": 131,
+      "pct": 0.8
+    },
+    {
+      "v": 95,
+      "hex": "$5f",
+      "c": 119,
+      "pct": 0.73
+    },
+    {
+      "v": 91,
+      "hex": "$5b",
+      "c": 103,
+      "pct": 0.63
+    },
+    {
+      "v": 141,
+      "hex": "$8d",
+      "c": 103,
+      "pct": 0.63
+    },
+    {
+      "v": 17,
+      "hex": "$11",
+      "c": 99,
+      "pct": 0.6
+    },
+    {
+      "v": 21,
+      "hex": "$15",
+      "c": 94,
+      "pct": 0.57
+    },
+    {
+      "v": 145,
+      "hex": "$91",
+      "c": 75,
+      "pct": 0.46
+    },
+    {
+      "v": 4,
+      "hex": "$04",
+      "c": 66,
+      "pct": 0.4
+    },
+    {
+      "v": 23,
+      "hex": "$17",
+      "c": 57,
+      "pct": 0.35
+    },
+    {
+      "v": 147,
+      "hex": "$93",
+      "c": 53,
+      "pct": 0.32
+    }
+  ]
+}
