@@ -36,6 +36,12 @@ Evidence:
 
 Artifacts: `tools/map-128.bin`, `tools/map-128.meta.json`, `tools/map-previews/map-specials.png`.
 
+### In-game map screen vs terrain grid
+
+The pause/overview map (white background, island **names**, H / cyclone icons, compass) is a **labelled schematic**, not a 1:1 paint of `$9300`. Island name strings live near `$6A50` (`GILLIGANS`, `BASE`, `PEAK`, …).
+
+Relative island positions match the 128×128 heightfield (~14 major landmasses); the overview draws tiny icons and leaves more ocean for labels. The editor heightfield looks “busier” because it shows every land cell at full size.
+
 ### Cell byte encoding
 
 | Range | Meaning |

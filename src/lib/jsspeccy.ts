@@ -8,6 +8,13 @@ export type JSSpeccyInstance = {
   openUrl: (url: string) => void
   loadSnapshotFromStruct: (snapshot: unknown) => void
   onReady: (callback: () => void) => void
+  /** Patched onto vendored JSSpeccy — pause/resume emulation. */
+  start: () => void
+  pause: () => void
+  isRunning: () => boolean
+  /** Patched — Spectrum matrix key via keyboardHandler. */
+  keyDown: (key: { row: number; mask: number }) => void
+  keyUp: (key: { row: number; mask: number }) => void
   exit: () => void
 }
 
@@ -26,10 +33,12 @@ export type JSSpeccyOptions = {
 }
 
 const SCRIPT_SRC = '/jsspeccy/jsspeccy.js'
+const SPECTRUM_WIDTH = 320
+const SPECTRUM_HEIGHT = 240
 
 let scriptPromise: Promise<void> | null = null
 
-export function loadJSSpeccyScript(): Promise<void> {
+function loadJSSpeccyScript(): Promise<void> {
   if (typeof window.JSSpeccy === 'function') {
     return Promise.resolve()
   }
@@ -62,10 +71,20 @@ export function loadJSSpeccyScript(): Promise<void> {
   return scriptPromise
 }
 
+function zoomToFitBox(widthPx: number, heightPx: number): number {
+  const zw = widthPx > 0 ? widthPx / SPECTRUM_WIDTH : 1
+  const zh = heightPx > 0 ? heightPx / SPECTRUM_HEIGHT : zw
+  return Math.max(0.05, Math.min(zw, zh))
+}
+
 export type EmulatorHandle = {
   instance: JSSpeccyInstance
   destroy: () => void
-  openUrl: (url: string) => void
+  fitBox: (widthPx: number, heightPx: number) => void
+  isRunning: () => boolean
+  togglePause: () => boolean
+  keyDown: (key: { row: number; mask: number }) => void
+  keyUp: (key: { row: number; mask: number }) => void
 }
 
 export async function mountEmulator(
@@ -76,20 +95,35 @@ export async function mountEmulator(
 
   const defaults: JSSpeccyOptions = {
     machine: 128,
-    zoom: 3,
+    zoom: 1,
     autoStart: true,
     autoLoadTapes: true,
     tapeAutoLoadMode: 'default',
     tapeTrapsEnabled: true,
     sandbox: true,
-    uiEnabled: true,
+    uiEnabled: false,
   }
 
   const instance = window.JSSpeccy(container, { ...defaults, ...options })
 
+  const isRunning = () => instance.isRunning()
+
   return {
     instance,
-    openUrl: (url: string) => instance.openUrl(url),
+    fitBox: (widthPx, heightPx) => {
+      instance.setZoom(zoomToFitBox(widthPx, heightPx))
+    },
+    isRunning,
+    keyDown: (key) => instance.keyDown(key),
+    keyUp: (key) => instance.keyUp(key),
+    togglePause: () => {
+      if (isRunning()) {
+        instance.pause()
+        return false
+      }
+      instance.start()
+      return true
+    },
     destroy: () => {
       try {
         instance.exit()
