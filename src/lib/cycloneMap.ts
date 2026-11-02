@@ -485,7 +485,7 @@ export function extractMapFromTap(
 }
 
 export async function loadStockMap(): Promise<TerrainMap> {
-  const res = await fetch('/levels/stock-map-128.bin')
+  const res = await fetch(`${import.meta.env.BASE_URL}levels/stock-map-128.bin`)
   if (!res.ok) throw new Error(`Failed to load stock map (${res.status})`)
   const buf = new Uint8Array(await res.arrayBuffer())
   if (buf.length !== MAP_SIZE) {

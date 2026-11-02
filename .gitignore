@@ -20,6 +20,8 @@ public/roms/**
 *.z80
 *.sna
 *.szx
+!public/taps/**/*.tap
+!public/taps/**/*.TAP
 !public/jsspeccy/**/*.rom
 
 # Editor directories and files

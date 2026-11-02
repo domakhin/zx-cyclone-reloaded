@@ -23,7 +23,7 @@ type Props = {
 const VIEW_WIDTH = 208
 const POLL_MS = 100
 const PEEK_TIMEOUT_MS = 1500
-const CYCLONE_ICON_SRC = '/favicon.png'
+const CYCLONE_ICON_SRC = `${import.meta.env.BASE_URL}favicon.png`
 const CYCLONE_ICON_SIZE = 12
 
 function inView(x: number, y: number): boolean {

@@ -47,7 +47,7 @@ export type JSSpeccyOptions = {
 }
 
 /** Query busts browser cache after vendored peekMemory patches. */
-const SCRIPT_SRC = '/jsspeccy/jsspeccy.js?peek=1'
+const SCRIPT_SRC = `${import.meta.env.BASE_URL}jsspeccy/jsspeccy.js?peek=1`
 /**
  * Active Spectrum bitmap (JSSpeccy framebuffer is 320×240 with border).
  * Zoom so 256×192 fills the host; border is clipped by overflow:hidden.
