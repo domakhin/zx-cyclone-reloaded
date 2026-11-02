@@ -3,10 +3,10 @@
  * Inject Spectrum matrix keys directly (JSSpeccy KeyboardEvent keyCode is unreliable).
  */
 
-export type SpectrumKey = { row: number; mask: number }
+type SpectrumKey = { row: number; mask: number }
 
 /** Spectrum keyboard matrix positions (JSSpeccy Br table). */
-export const SPECTRUM_KEYS = {
+const SPECTRUM_KEYS = {
   O: { row: 5, mask: 2 },
   P: { row: 5, mask: 1 },
   X: { row: 0, mask: 4 },

@@ -1,0 +1,518 @@
+{
+  "source": "Cyclone3 $F230 stride $14 (patched)",
+  "patch": {
+    "island": "PEAK",
+    "fromSector": [
+      4,
+      0
+    ],
+    "toSector": [
+      1,
+      2
+    ],
+    "deltaWorld": [
+      -384,
+      256
+    ],
+    "mapPtrUnchanged": true,
+    "overviewTranslated": true,
+    "overviewPixelScale": 4,
+    "note": "AABB/origin + M-map silhouette/label DF addresses translated by whole sectors; atlas mapPtr/ovW/ovH unchanged."
+  },
+  "base": 62000,
+  "stride": 20,
+  "formula": "atlas_addr = mapPtr + ((wy&255)-yRef)*128 + ((wx&255)-xRef) when (wx>>8)==xHi && (wy>>8)==yHi && xMin..xMax,yMin..yMax",
+  "evidence": "routines $775e/$7777/$7789; cull $76e9; BONE sector (3,1), BANANA center sector (5,3)",
+  "windows": [
+    {
+      "name": "BANANA",
+      "xHi": 2,
+      "yHi": 1,
+      "xMinLo": 92,
+      "xMaxLo": 168,
+      "yMinLo": 128,
+      "yMaxLo": 184,
+      "xRef": 114,
+      "xRef2": 146,
+      "yRef": 156,
+      "yRef2": 156,
+      "mapPtr": 37632,
+      "xMin": 604,
+      "xMax": 680,
+      "yMin": 384,
+      "yMax": 440,
+      "sector": [
+        5,
+        3
+      ],
+      "ovScr": 18580,
+      "ovW": 13,
+      "ovH": 6,
+      "ovLabel": 18543,
+      "ovAttrHi": 89,
+      "ovScrPix": {
+        "x": 160,
+        "y": 96
+      },
+      "ovLabelPix": {
+        "x": 120,
+        "y": 88
+      }
+    },
+    {
+      "name": "ORTE",
+      "xHi": 1,
+      "yHi": 2,
+      "xMinLo": 136,
+      "xMaxLo": 211,
+      "yMinLo": 0,
+      "yMaxLo": 57,
+      "xRef": 158,
+      "xRef2": 189,
+      "yRef": 28,
+      "yRef2": 29,
+      "mapPtr": 40192,
+      "xMin": 392,
+      "xMax": 467,
+      "yMin": 512,
+      "yMax": 569,
+      "sector": [
+        3,
+        4
+      ],
+      "ovScr": 21261,
+      "ovW": 12,
+      "ovH": 7,
+      "ovLabel": 20526,
+      "ovAttrHi": 90,
+      "ovScrPix": {
+        "x": 104,
+        "y": 131
+      },
+      "ovLabelPix": {
+        "x": 112,
+        "y": 136
+      }
+    },
+    {
+      "name": "KOKOLA",
+      "xHi": 1,
+      "yHi": 0,
+      "xMinLo": 87,
+      "xMaxLo": 161,
+      "yMinLo": 148,
+      "yMaxLo": 204,
+      "xRef": 109,
+      "xRef2": 139,
+      "yRef": 176,
+      "yRef2": 175,
+      "mapPtr": 43264,
+      "xMin": 343,
+      "xMax": 417,
+      "yMin": 148,
+      "yMax": 204,
+      "sector": [
+        2,
+        1
+      ],
+      "ovScr": 16555,
+      "ovW": 12,
+      "ovH": 7,
+      "ovLabel": 16584,
+      "ovAttrHi": 88,
+      "ovScrPix": {
+        "x": 88,
+        "y": 40
+      },
+      "ovLabelPix": {
+        "x": 64,
+        "y": 48
+      }
+    },
+    {
+      "name": "LAGOON",
+      "xHi": 0,
+      "yHi": 0,
+      "xMinLo": 116,
+      "xMaxLo": 203,
+      "yMinLo": 184,
+      "yMaxLo": 240,
+      "xRef": 138,
+      "xRef2": 181,
+      "yRef": 212,
+      "yRef2": 212,
+      "mapPtr": 46592,
+      "xMin": 116,
+      "xMax": 203,
+      "yMin": 184,
+      "yMax": 240,
+      "sector": [
+        1,
+        1
+      ],
+      "ovScr": 16580,
+      "ovW": 16,
+      "ovH": 7,
+      "ovLabel": 16610,
+      "ovAttrHi": 88,
+      "ovScrPix": {
+        "x": 32,
+        "y": 48
+      },
+      "ovLabelPix": {
+        "x": 16,
+        "y": 56
+      }
+    },
+    {
+      "name": "PEAK",
+      "xHi": 0,
+      "yHi": 1,
+      "xMinLo": 168,
+      "xMaxLo": 229,
+      "yMinLo": 88,
+      "yMaxLo": 144,
+      "xRef": 190,
+      "xRef2": 207,
+      "yRef": 116,
+      "yRef2": 116,
+      "mapPtr": 49920,
+      "xMin": 168,
+      "xMax": 229,
+      "yMin": 344,
+      "yMax": 400,
+      "sector": [
+        1,
+        2
+      ],
+      "ovScr": 18534,
+      "ovW": 10,
+      "ovH": 7,
+      "ovLabel": 18500,
+      "ovAttrHi": 89,
+      "ovScrPix": {
+        "x": 48,
+        "y": 88
+      },
+      "ovLabelPix": {
+        "x": 32,
+        "y": 80
+      }
+    },
+    {
+      "name": "BASE",
+      "xHi": 1,
+      "yHi": 1,
+      "xMinLo": 28,
+      "xMaxLo": 130,
+      "yMinLo": 80,
+      "yMaxLo": 136,
+      "xRef": 50,
+      "xRef2": 108,
+      "yRef": 108,
+      "yRef2": 108,
+      "mapPtr": 53120,
+      "xMin": 284,
+      "xMax": 386,
+      "yMin": 336,
+      "yMax": 392,
+      "sector": [
+        2,
+        2
+      ],
+      "ovScr": 18537,
+      "ovW": 20,
+      "ovH": 7,
+      "ovLabel": 18566,
+      "ovAttrHi": 89,
+      "ovScrPix": {
+        "x": 72,
+        "y": 88
+      },
+      "ovLabelPix": {
+        "x": 48,
+        "y": 96
+      }
+    },
+    {
+      "name": "GILLIGANS",
+      "xHi": 1,
+      "yHi": 0,
+      "xMinLo": 28,
+      "xMaxLo": 94,
+      "yMinLo": 88,
+      "yMaxLo": 145,
+      "xRef": 50,
+      "xRef2": 72,
+      "yRef": 116,
+      "yRef2": 117,
+      "mapPtr": 37716,
+      "xMin": 284,
+      "xMax": 350,
+      "yMin": 88,
+      "yMax": 145,
+      "sector": [
+        2,
+        0
+      ],
+      "ovScr": 16489,
+      "ovW": 10,
+      "ovH": 7,
+      "ovLabel": 16450,
+      "ovAttrHi": 88,
+      "ovScrPix": {
+        "x": 72,
+        "y": 24
+      },
+      "ovLabelPix": {
+        "x": 16,
+        "y": 16
+      }
+    },
+    {
+      "name": "RED",
+      "xHi": 1,
+      "yHi": 2,
+      "xMinLo": 120,
+      "xMaxLo": 182,
+      "yMinLo": 64,
+      "yMaxLo": 120,
+      "xRef": 142,
+      "xRef2": 160,
+      "yRef": 92,
+      "yRef2": 92,
+      "mapPtr": 40920,
+      "xMin": 376,
+      "xMax": 438,
+      "yMin": 576,
+      "yMax": 632,
+      "sector": [
+        3,
+        4
+      ],
+      "ovScr": 21324,
+      "ovW": 9,
+      "ovH": 7,
+      "ovLabel": 20589,
+      "ovAttrHi": 90,
+      "ovScrPix": {
+        "x": 96,
+        "y": 147
+      },
+      "ovLabelPix": {
+        "x": 104,
+        "y": 152
+      }
+    },
+    {
+      "name": "SKEG",
+      "xHi": 0,
+      "yHi": 2,
+      "xMinLo": 112,
+      "xMaxLo": 173,
+      "yMinLo": 0,
+      "yMaxLo": 56,
+      "xRef": 134,
+      "xRef2": 151,
+      "yRef": 28,
+      "yRef2": 28,
+      "mapPtr": 44504,
+      "xMin": 112,
+      "xMax": 173,
+      "yMin": 512,
+      "yMax": 568,
+      "sector": [
+        1,
+        4
+      ],
+      "ovScr": 21764,
+      "ovW": 9,
+      "ovH": 7,
+      "ovLabel": 20517,
+      "ovAttrHi": 90,
+      "ovScrPix": {
+        "x": 32,
+        "y": 133
+      },
+      "ovLabelPix": {
+        "x": 40,
+        "y": 136
+      }
+    },
+    {
+      "name": "BONE",
+      "xHi": 1,
+      "yHi": 0,
+      "xMinLo": 172,
+      "xMaxLo": 255,
+      "yMinLo": 124,
+      "yMaxLo": 180,
+      "xRef": 194,
+      "xRef2": 233,
+      "yRef": 152,
+      "yRef2": 152,
+      "mapPtr": 47171,
+      "xMin": 428,
+      "xMax": 511,
+      "yMin": 124,
+      "yMax": 180,
+      "sector": [
+        3,
+        1
+      ],
+      "ovScr": 16526,
+      "ovW": 15,
+      "ovH": 7,
+      "ovLabel": 16559,
+      "ovAttrHi": 88,
+      "ovScrPix": {
+        "x": 112,
+        "y": 32
+      },
+      "ovLabelPix": {
+        "x": 120,
+        "y": 40
+      }
+    },
+    {
+      "name": "GIANTS",
+      "xHi": 1,
+      "yHi": 1,
+      "xMinLo": 152,
+      "xMaxLo": 203,
+      "yMinLo": 12,
+      "yMaxLo": 80,
+      "xRef": 174,
+      "xRef2": 181,
+      "yRef": 40,
+      "yRef2": 52,
+      "mapPtr": 37687,
+      "xMin": 408,
+      "xMax": 459,
+      "yMin": 268,
+      "yMax": 336,
+      "sector": [
+        3,
+        2
+      ],
+      "ovScr": 18477,
+      "ovW": 7,
+      "ovH": 10,
+      "ovLabel": 18478,
+      "ovAttrHi": 89,
+      "ovScrPix": {
+        "x": 104,
+        "y": 72
+      },
+      "ovLabelPix": {
+        "x": 112,
+        "y": 72
+      }
+    },
+    {
+      "name": "CLAW",
+      "xHi": 1,
+      "yHi": 1,
+      "xMinLo": 196,
+      "xMaxLo": 253,
+      "yMinLo": 192,
+      "yMaxLo": 254,
+      "xRef": 218,
+      "xRef2": 231,
+      "yRef": 220,
+      "yRef2": 226,
+      "mapPtr": 42805,
+      "xMin": 452,
+      "xMax": 509,
+      "yMin": 448,
+      "yMax": 510,
+      "sector": [
+        3,
+        3
+      ],
+      "ovScr": 19407,
+      "ovW": 8,
+      "ovH": 8,
+      "ovLabel": 18672,
+      "ovAttrHi": 89,
+      "ovScrPix": {
+        "x": 120,
+        "y": 115
+      },
+      "ovLabelPix": {
+        "x": 128,
+        "y": 120
+      }
+    },
+    {
+      "name": "LUKELAND",
+      "xHi": 0,
+      "yHi": 2,
+      "xMinLo": 48,
+      "xMaxLo": 109,
+      "yMinLo": 48,
+      "yMaxLo": 108,
+      "xRef": 70,
+      "xRef2": 87,
+      "yRef": 76,
+      "yRef2": 80,
+      "mapPtr": 50728,
+      "xMin": 48,
+      "xMax": 109,
+      "yMin": 560,
+      "yMax": 620,
+      "sector": [
+        0,
+        4
+      ],
+      "ovScr": 20546,
+      "ovW": 9,
+      "ovH": 8,
+      "ovLabel": 20578,
+      "ovAttrHi": 90,
+      "ovScrPix": {
+        "x": 16,
+        "y": 144
+      },
+      "ovLabelPix": {
+        "x": 16,
+        "y": 152
+      }
+    },
+    {
+      "name": "ENTERPRISE",
+      "xHi": 0,
+      "yHi": 1,
+      "xMinLo": 68,
+      "xMaxLo": 139,
+      "yMinLo": 176,
+      "yMaxLo": 251,
+      "xRef": 90,
+      "xRef2": 117,
+      "yRef": 204,
+      "yRef2": 223,
+      "mapPtr": 50767,
+      "xMin": 68,
+      "xMax": 139,
+      "yMin": 432,
+      "yMax": 507,
+      "sector": [
+        0,
+        3
+      ],
+      "ovScr": 18626,
+      "ovW": 11,
+      "ovH": 12,
+      "ovLabel": 18628,
+      "ovAttrHi": 89,
+      "ovScrPix": {
+        "x": 16,
+        "y": 112
+      },
+      "ovLabelPix": {
+        "x": 32,
+        "y": 112
+      }
+    }
+  ]
+}

@@ -53,13 +53,15 @@ export function App() {
         {!onPlay && <EditorPage />}
       </main>
 
-      <footer className="flex flex-wrap justify-between gap-x-6 gap-y-3 border-t border-line bg-surface px-5 py-3 text-xs text-muted">
-        <span>
-          Original Cyclone © Vortex Software / Costa Panayi — supply your own
-          legal dump.
-        </span>
-        <span>Emulator: JSSpeccy 3 (GPLv3)</span>
-      </footer>
+      {!onPlay && (
+        <footer className="flex flex-wrap justify-between gap-x-6 gap-y-3 border-t border-line bg-surface px-5 py-3 text-xs text-muted">
+          <span>
+            Original Cyclone © Vortex Software / Costa Panayi — supply your own
+            legal dump.
+          </span>
+          <span>Emulator: JSSpeccy 3 (GPLv3)</span>
+        </footer>
+      )}
     </div>
   )
 }

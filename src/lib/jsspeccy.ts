@@ -1,3 +1,13 @@
+export type PeekMemoryRange = { start: number; length: number }
+
+export type PeekMemoryResponse = {
+  ranges: Array<{ start: number; length: number; data: Uint8Array }>
+  pc?: number
+  halted?: boolean
+  registers?: Record<string, number>
+  error?: string
+}
+
 export type JSSpeccyInstance = {
   setZoom: (zoom: number) => void
   enterFullscreen: () => void
@@ -15,6 +25,10 @@ export type JSSpeccyInstance = {
   /** Patched — Spectrum matrix key via keyboardHandler. */
   keyDown: (key: { row: number; mask: number }) => void
   keyUp: (key: { row: number; mask: number }) => void
+  /** Patched — Z80 address-space peek via worker `o.peek`. */
+  peekMemory: (
+    ranges: PeekMemoryRange[] | PeekMemoryRange,
+  ) => Promise<PeekMemoryResponse>
   exit: () => void
 }
 
@@ -32,14 +46,28 @@ export type JSSpeccyOptions = {
   keyboardMap?: string
 }
 
-const SCRIPT_SRC = '/jsspeccy/jsspeccy.js'
-const SPECTRUM_WIDTH = 320
-const SPECTRUM_HEIGHT = 240
+/** Query busts browser cache after vendored peekMemory patches. */
+const SCRIPT_SRC = '/jsspeccy/jsspeccy.js?peek=1'
+/**
+ * Active Spectrum bitmap (JSSpeccy framebuffer is 320×240 with border).
+ * Zoom so 256×192 fills the host; border is clipped by overflow:hidden.
+ */
+const SCREEN_WIDTH = 256
+const SCREEN_HEIGHT = 192
 
 let scriptPromise: Promise<void> | null = null
 
+function jsspeccyFactoryHasPeek(): boolean {
+  return (
+    typeof window.JSSpeccy === 'function' &&
+    Function.prototype.toString
+      .call(window.JSSpeccy)
+      .includes('peekMemory')
+  )
+}
+
 function loadJSSpeccyScript(): Promise<void> {
-  if (typeof window.JSSpeccy === 'function') {
+  if (jsspeccyFactoryHasPeek()) {
     return Promise.resolve()
   }
   if (scriptPromise) {
@@ -47,24 +75,26 @@ function loadJSSpeccyScript(): Promise<void> {
   }
 
   scriptPromise = new Promise((resolve, reject) => {
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[src="${SCRIPT_SRC}"]`,
-    )
-    if (existing) {
-      existing.addEventListener('load', () => resolve(), { once: true })
-      existing.addEventListener(
-        'error',
-        () => reject(new Error('Failed to load JSSpeccy')),
-        { once: true },
-      )
-      return
-    }
+    // Drop any unpatched build still in the page (HMR / prior session).
+    document
+      .querySelectorAll<HTMLScriptElement>('script[src*="jsspeccy/jsspeccy.js"]')
+      .forEach((el) => el.remove())
 
     const script = document.createElement('script')
     script.src = SCRIPT_SRC
     script.async = true
-    script.onload = () => resolve()
-    script.onerror = () => reject(new Error('Failed to load JSSpeccy'))
+    script.onload = () => {
+      if (!jsspeccyFactoryHasPeek()) {
+        scriptPromise = null
+        reject(new Error('JSSpeccy loaded without peekMemory patch'))
+        return
+      }
+      resolve()
+    }
+    script.onerror = () => {
+      scriptPromise = null
+      reject(new Error('Failed to load JSSpeccy'))
+    }
     document.head.appendChild(script)
   })
 
@@ -72,8 +102,10 @@ function loadJSSpeccyScript(): Promise<void> {
 }
 
 function zoomToFitBox(widthPx: number, heightPx: number): number {
-  const zw = widthPx > 0 ? widthPx / SPECTRUM_WIDTH : 1
-  const zh = heightPx > 0 ? heightPx / SPECTRUM_HEIGHT : zw
+  // Size so the 256×192 playfield fills the host; 320×240 canvas overflows
+  // and the border is cropped by the host's overflow:hidden.
+  const zw = widthPx > 0 ? widthPx / SCREEN_WIDTH : 1
+  const zh = heightPx > 0 ? heightPx / SCREEN_HEIGHT : zw
   return Math.max(0.05, Math.min(zw, zh))
 }
 
@@ -85,6 +117,9 @@ export type EmulatorHandle = {
   togglePause: () => boolean
   keyDown: (key: { row: number; mask: number }) => void
   keyUp: (key: { row: number; mask: number }) => void
+  peekMemory: (
+    ranges: PeekMemoryRange[] | PeekMemoryRange,
+  ) => Promise<PeekMemoryResponse>
 }
 
 export async function mountEmulator(
@@ -106,9 +141,15 @@ export async function mountEmulator(
 
   const instance = window.JSSpeccy(container, { ...defaults, ...options })
 
+  if (typeof instance.peekMemory !== 'function') {
+    throw new Error(
+      'JSSpeccy peekMemory missing — patched public/jsspeccy build not loaded. Hard-reload the page.',
+    )
+  }
+
   const isRunning = () => instance.isRunning()
 
-  return {
+  const handle: EmulatorHandle = {
     instance,
     fitBox: (widthPx, heightPx) => {
       instance.setZoom(zoomToFitBox(widthPx, heightPx))
@@ -116,6 +157,7 @@ export async function mountEmulator(
     isRunning,
     keyDown: (key) => instance.keyDown(key),
     keyUp: (key) => instance.keyUp(key),
+    peekMemory: (ranges) => instance.peekMemory(ranges),
     togglePause: () => {
       if (isRunning()) {
         instance.pause()
@@ -130,7 +172,18 @@ export async function mountEmulator(
       } catch {
         // ignore double-exit
       }
+      if (
+        (window as unknown as { __cycloneEmu?: EmulatorHandle }).__cycloneEmu ===
+        handle
+      ) {
+        delete (window as unknown as { __cycloneEmu?: EmulatorHandle })
+          .__cycloneEmu
+      }
       container.replaceChildren()
     },
   }
+
+  ;(window as unknown as { __cycloneEmu?: EmulatorHandle }).__cycloneEmu =
+    handle
+  return handle
 }

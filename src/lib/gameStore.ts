@@ -2,7 +2,7 @@ const DB_NAME = 'zx-cyclone-reloaded'
 const DB_VERSION = 1
 const STORE = 'gameImages'
 
-export type GameImageKind = 'tap' | 'tzx' | 'z80' | 'sna' | 'szx' | 'zip' | 'unknown'
+type GameImageKind = 'tap' | 'tzx' | 'z80' | 'sna' | 'szx' | 'zip' | 'unknown'
 
 export type StoredGameImage = {
   id: 'base'
@@ -87,17 +87,6 @@ export async function loadGameImage(): Promise<StoredGameImage | null> {
     })
     await txDone(tx)
     return record ?? null
-  } finally {
-    db.close()
-  }
-}
-
-export async function clearGameImage(): Promise<void> {
-  const db = await openDb()
-  try {
-    const tx = db.transaction(STORE, 'readwrite')
-    tx.objectStore(STORE).delete('base')
-    await txDone(tx)
   } finally {
     db.close()
   }

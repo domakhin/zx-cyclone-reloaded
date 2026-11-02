@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 
-export type Route = 'play' | 'editor'
+type Route = 'play' | 'editor'
 
 function parseRoute(): Route {
   const hash = location.hash.replace(/^#\/?/, '').toLowerCase()
