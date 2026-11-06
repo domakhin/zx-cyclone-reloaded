@@ -6,13 +6,22 @@
 type SpectrumKey = { row: number; mask: number }
 
 /** Spectrum keyboard matrix positions (JSSpeccy Br table). */
-const SPECTRUM_KEYS = {
+export const SPECTRUM_KEYS = {
   O: { row: 5, mask: 2 },
   P: { row: 5, mask: 1 },
   X: { row: 0, mask: 4 },
   M: { row: 7, mask: 4 },
   N: { row: 7, mask: 8 },
+  ONE: { row: 3, mask: 1 },
+  TWO: { row: 3, mask: 2 },
+  THREE: { row: 3, mask: 4 },
+  FOUR: { row: 3, mask: 8 },
+  FIVE: { row: 3, mask: 16 },
+  SIX: { row: 4, mask: 16 },
+  Q: { row: 2, mask: 1 },
 } as const satisfies Record<string, SpectrumKey>
+
+export type { SpectrumKey }
 
 type KeySink = {
   keyDown: (key: SpectrumKey) => void

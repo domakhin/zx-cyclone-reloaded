@@ -24,7 +24,7 @@ export const WORLD_HEIGHT = WORLD_SECTORS * SECTOR_SIZE
  *   atlas_addr = mapPtr + ((wy & 255) - yRef) * 128 + ((wx & 255) - xRef)
  * Evidence: `$775e` / `$7777` / `$7789`, cull `$76e9`.
  */
-type IslandWindow = {
+export type IslandWindow = {
   name: string
   xHi: number
   yHi: number
@@ -284,7 +284,92 @@ export type TerrainMap = {
 }
 
 /** atlas = dense $9300 pack; world = 768×768; overview = flat atlas; mmap = in-game M screen */
-export type MapViewMode = 'tile' | 'world' | 'overview' | 'mmap'
+export type MapViewMode =
+  | 'tile'
+  | 'world'
+  | 'world-outer-ring'
+  | 'overview'
+  | 'mmap'
+
+/** True for sparse 768×768 world canvases (stock or patched window layouts). */
+export function isWorldViewMode(
+  mode: MapViewMode,
+): mode is 'world' | 'world-outer-ring' {
+  return mode === 'world' || mode === 'world-outer-ring'
+}
+
+/** Public JSON layouts under `public/levels/`. */
+export const ISLAND_WINDOW_LAYOUTS = {
+  'outer-ring': {
+    id: 'outer-ring',
+    label: 'Outer Ring Rescue',
+    url: `${import.meta.env.BASE_URL}levels/island-windows-outer-ring.json`,
+  },
+} as const
+
+export type IslandWindowLayoutId = keyof typeof ISLAND_WINDOW_LAYOUTS
+
+type IslandWindowsJson = {
+  concept?: { title?: string; summary?: string }
+  windows: Array<{
+    name: string
+    xHi: number
+    yHi: number
+    xMin: number
+    xMax: number
+    yMin: number
+    yMax: number
+    xRef: number
+    yRef: number
+    xRef2?: number
+    yRef2?: number
+    mapPtr: number
+    ovScr?: number
+    ovW?: number
+    ovH?: number
+    ovLabel?: number
+    ovAttrHi?: number
+  }>
+}
+
+/** Load a patched `$F230` window layout JSON (e.g. Outer Ring). */
+export async function loadIslandWindowsLayout(
+  id: IslandWindowLayoutId,
+): Promise<{ windows: IslandWindow[]; title: string; summary: string }> {
+  const meta = ISLAND_WINDOW_LAYOUTS[id]
+  const res = await fetch(meta.url)
+  if (!res.ok) {
+    throw new Error(`Failed to load ${meta.url} (${res.status})`)
+  }
+  const doc = (await res.json()) as IslandWindowsJson
+  if (!Array.isArray(doc.windows) || doc.windows.length === 0) {
+    throw new Error(`${meta.url} has no windows[]`)
+  }
+  const windows: IslandWindow[] = doc.windows.map((w) => ({
+    name: w.name,
+    xHi: w.xHi,
+    yHi: w.yHi,
+    xMin: w.xMin,
+    xMax: w.xMax,
+    yMin: w.yMin,
+    yMax: w.yMax,
+    xRef: w.xRef,
+    yRef: w.yRef,
+    xRef2: w.xRef2,
+    yRef2: w.yRef2,
+    mapPtr: w.mapPtr,
+    ovScr: w.ovScr,
+    ovW: w.ovW,
+    ovH: w.ovH,
+    ovLabel: w.ovLabel,
+    ovAttrHi: w.ovAttrHi,
+  }))
+  return {
+    windows,
+    title: doc.concept?.title ?? meta.label,
+    summary: doc.concept?.summary ?? '',
+  }
+}
 
 function elevation(cell: number): number {
   if (cell === 0) return 0
@@ -501,7 +586,7 @@ export async function loadStockMap(): Promise<TerrainMap> {
 
 function rasterizeTile(
   map: TerrainMap,
-  mode: Exclude<MapViewMode, 'world' | 'mmap'>,
+  mode: Exclude<MapViewMode, 'world' | 'world-outer-ring' | 'mmap'>,
 ): HTMLCanvasElement {
   const w = map.width
   const h = map.height
@@ -786,7 +871,8 @@ export function paintTerrainMap(
   const scale = options.scale ?? 4
   const mode = options.mode ?? 'tile'
   const showGrid = options.showSectorGrid ?? true
-  const showWindows = options.showIslandWindows ?? mode === 'world'
+  const showWindows =
+    options.showIslandWindows ?? isWorldViewMode(mode)
   const windows = options.islandWindows ?? windowsForMap(map)
   const focus = options.focusSector ?? null
 
@@ -798,7 +884,7 @@ export function paintTerrainMap(
     return
   }
 
-  const tileMode: Exclude<MapViewMode, 'world' | 'mmap'> =
+  const tileMode: Exclude<MapViewMode, 'world' | 'world-outer-ring' | 'mmap'> =
     mode === 'overview' ? 'overview' : 'tile'
   const tile = rasterizeTile(map, tileMode)
 
@@ -807,7 +893,7 @@ export function paintTerrainMap(
     ctx.fillRect(0, 0, ctx.canvas.width, ctx.canvas.height)
   }
 
-  if (mode !== 'world') {
+  if (!isWorldViewMode(mode)) {
     ctx.drawImage(tile, 0, 0, map.width * scale, map.height * scale)
     return
   }
@@ -901,7 +987,7 @@ export function pickWorldCell(
   const cellX = Math.floor(x / scale)
   const cellY = Math.floor(y / scale)
 
-  if (mode === 'world') {
+  if (isWorldViewMode(mode)) {
     if (cellX < 0 || cellY < 0 || cellX >= WORLD_WIDTH || cellY >= WORLD_HEIGHT) {
       return null
     }
@@ -979,7 +1065,7 @@ export function peekAtlasUnderCursor(
 ): AtlasPeek | null {
   const atlasLen = atlas.width * atlas.height
 
-  if (mode !== 'world') {
+  if (!isWorldViewMode(mode)) {
     if (
       globalX < 0 ||
       globalY < 0 ||

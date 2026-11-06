@@ -1,13 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { FileButton, Button } from '../components/ui'
 import { MiniMapPanel } from '../components/MiniMapPanel'
+import { SoftKeys, SoftNumberKeys } from '../components/SoftKeys'
+import { TouchStick } from '../components/TouchStick'
 import {
   gameImageObjectUrl,
   loadGameImage,
   saveGameImage,
   type StoredGameImage,
 } from '../lib/gameStore'
-import { installCycloneKeymap } from '../lib/cycloneKeymap'
+import { installCycloneKeymap, type SpectrumKey } from '../lib/cycloneKeymap'
 import { mountEmulator, type EmulatorHandle } from '../lib/jsspeccy'
 import {
   extractMapFromTap,
@@ -31,6 +33,7 @@ export function PlayPage({ active }: Props) {
   const pageRef = useRef<HTMLElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
   const toolbarRef = useRef<HTMLDivElement>(null)
+  const touchRef = useRef<HTMLDivElement>(null)
   const emuRef = useRef<EmulatorHandle | null>(null)
   const objectUrlRef = useRef<string | null>(null)
   // Keep fit/load callbacks stable across Play↔Editor so the mount effect
@@ -78,11 +81,12 @@ export function PlayPage({ active }: Props) {
 
     if (w < 32) w = vp.w
     if (h < 32) {
-      // Play hides the site footer; only header + toolbar shrink the host.
+      // Play hides the site footer; header + toolbar + touch stick shrink the host.
       const topbar =
         document.querySelector('header')?.getBoundingClientRect().height ?? 0
       const toolbar = toolbarRef.current?.getBoundingClientRect().height ?? 0
-      h = Math.max(120, Math.floor(vp.h - topbar - toolbar))
+      const touch = touchRef.current?.getBoundingClientRect().height ?? 0
+      h = Math.max(120, Math.floor(vp.h - topbar - toolbar - touch))
     }
 
     w = Math.min(w, vp.w)
@@ -102,14 +106,22 @@ export function PlayPage({ active }: Props) {
     scheduleFit()
   }, [active, scheduleFit])
 
+  const onSpectrumKeyDown = useCallback((key: SpectrumKey) => {
+    emuRef.current?.keyDown(key)
+  }, [])
+
+  const onSpectrumKeyUp = useCallback((key: SpectrumKey) => {
+    emuRef.current?.keyUp(key)
+  }, [])
+
   // Arrow/Space → O/P/X/M while Play is visible (Cyclone stock keys).
   useEffect(() => {
     if (!active || !pageRef.current) return
     return installCycloneKeymap(pageRef.current, {
-      keyDown: (key) => emuRef.current?.keyDown(key),
-      keyUp: (key) => emuRef.current?.keyUp(key),
+      keyDown: onSpectrumKeyDown,
+      keyUp: onSpectrumKeyUp,
     })
-  }, [active])
+  }, [active, onSpectrumKeyDown, onSpectrumKeyUp])
 
   useEffect(() => {
     const onResize = () => scheduleFit()
@@ -209,6 +221,9 @@ export function PlayPage({ active }: Props) {
         className="flex flex-wrap items-stretch gap-2.5 px-[max(0.75rem,env(safe-area-inset-left))] py-2.5 pr-[max(0.75rem,env(safe-area-inset-right))]"
       >
         <FileButton
+          className="min-w-10 px-3"
+          aria-label="Load game image"
+          title="Load game image"
           inputProps={{
             accept: '.tap,.tzx,.z80,.sna,.szx,.zip',
             onChange: (e) => {
@@ -218,7 +233,20 @@ export function PlayPage({ active }: Props) {
             },
           }}
         >
-          Load game image
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M2.25 1.75h7.75L11.75 3.5v8.75H2.25V1.75z" />
+            <path d="M4.25 12.25v-4.5h5.5v4.5M4.25 1.75v3.25h5V1.75" />
+          </svg>
         </FileButton>
         <Button
           className="min-w-10 px-3"
@@ -258,11 +286,26 @@ export function PlayPage({ active }: Props) {
           )}
         </Button>
         <Button
+          className="min-w-10 px-3"
+          aria-label={showMap ? 'Hide mini-map' : 'Show mini-map'}
           aria-pressed={showMap}
           title={showMap ? 'Hide mini-map' : 'Show mini-map'}
           onClick={() => setShowMap((v) => !v)}
         >
-          Map
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 14 14"
+            aria-hidden="true"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.25"
+            strokeLinecap="round"
+          >
+            <circle cx="7" cy="7" r="5.25" />
+            <ellipse cx="7" cy="7" rx="2.25" ry="5.25" />
+            <path d="M1.75 7h10.5M2.6 4.25h8.8M2.6 9.75h8.8" />
+          </svg>
         </Button>
       </div>
 
@@ -274,6 +317,15 @@ export function PlayPage({ active }: Props) {
           className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden bg-black outline-none [&_canvas]:block [&_canvas]:[image-rendering:pixelated] [&_>div]:m-auto"
           title="Spectrum border cropped — 256×192 playfield fills the view"
         />
+      </div>
+
+      <div
+        ref={touchRef}
+        className="flex shrink-0 items-center justify-between gap-4 border-t border-line bg-surface px-[max(1rem,env(safe-area-inset-left))] py-3 pr-[max(1rem,env(safe-area-inset-right))] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+      >
+        <TouchStick onKeyDown={onSpectrumKeyDown} onKeyUp={onSpectrumKeyUp} />
+        <SoftNumberKeys onKeyDown={onSpectrumKeyDown} onKeyUp={onSpectrumKeyUp} />
+        <SoftKeys onKeyDown={onSpectrumKeyDown} onKeyUp={onSpectrumKeyUp} />
       </div>
 
       {showMap && active && (

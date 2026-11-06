@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import {
   extractMapFromTap,
   formatAtlasPeek,
+  isWorldViewMode,
+  loadIslandWindowsLayout,
   loadStockMap,
   mapStats,
   paintTerrainMap,
@@ -16,6 +18,7 @@ import {
   WORLD_HEIGHT,
   WORLD_SECTORS,
   WORLD_WIDTH,
+  type IslandWindow,
   type MapViewMode,
   type TerrainMap,
 } from '../lib/cycloneMap'
@@ -25,13 +28,13 @@ type FocusSector = { sx: number; sy: number }
 
 function scaleForMode(mode: MapViewMode): number {
   // World is 768×768 — keep 1px/cell; M-map 2× Spectrum; atlas 4px/cell.
-  if (mode === 'world') return 1
+  if (isWorldViewMode(mode)) return 1
   if (mode === 'mmap') return 2
   return 4
 }
 
 function canvasSize(mode: MapViewMode, scale: number): { w: number; h: number } {
-  if (mode === 'world') {
+  if (isWorldViewMode(mode)) {
     return { w: WORLD_WIDTH * scale, h: WORLD_HEIGHT * scale }
   }
   if (mode === 'mmap') {
@@ -50,8 +53,16 @@ export function EditorPage() {
   const [status, setStatus] = useState('Loading map…')
   const [stats, setStats] = useState('')
   const [note, setNote] = useState('')
+  const [outerRingWindows, setOuterRingWindows] = useState<IslandWindow[] | null>(
+    null,
+  )
+  const [outerRingMeta, setOuterRingMeta] = useState<{
+    title: string
+    summary: string
+  } | null>(null)
 
   const scale = scaleForMode(mode)
+  const worldMode = isWorldViewMode(mode)
 
   useEffect(() => {
     let cancelled = false
@@ -93,7 +104,28 @@ export function EditorPage() {
   }, [])
 
   useEffect(() => {
+    if (mode !== 'world-outer-ring' || outerRingWindows) return
+    let cancelled = false
+    void (async () => {
+      try {
+        const layout = await loadIslandWindowsLayout('outer-ring')
+        if (cancelled) return
+        setOuterRingWindows(layout.windows)
+        setOuterRingMeta({ title: layout.title, summary: layout.summary })
+      } catch (err) {
+        if (cancelled) return
+        const msg = err instanceof Error ? err.message : String(err)
+        setNote(`Failed to load Outer Ring layout: ${msg}`)
+      }
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [mode, outerRingWindows])
+
+  useEffect(() => {
     if (!map) return
+    if (mode === 'world-outer-ring' && !outerRingWindows) return
     const canvas = canvasRef.current
     const ctx = canvas?.getContext('2d')
     if (!canvas || !ctx) return
@@ -104,13 +136,16 @@ export function EditorPage() {
       canvas.height = h
     }
 
-    const windows = windowsForMap(map)
+    const windows =
+      mode === 'world-outer-ring' && outerRingWindows
+        ? outerRingWindows
+        : windowsForMap(map)
     paintTerrainMap(ctx, map, {
       scale,
       mode,
-      focusSector: mode === 'world' ? focus : null,
-      showSectorGrid: mode === 'world',
-      showIslandWindows: mode === 'world' && showWindows,
+      focusSector: worldMode ? focus : null,
+      showSectorGrid: worldMode,
+      showIslandWindows: worldMode && showWindows,
       islandWindows: windows,
     })
 
@@ -124,7 +159,13 @@ export function EditorPage() {
       `atlas ${map.width}×${map.height} · world ${WORLD_WIDTH}×${WORLD_HEIGHT} (${WORLD_SECTORS}×${WORLD_SECTORS}×${SECTOR_SIZE}) · sea ${s.sea} · land ${s.land} · struct ${s.structure} · PEAK sec ${peakSec}`,
     )
 
-    if (mode === 'world') {
+    if (mode === 'world-outer-ring') {
+      setNote(
+        outerRingMeta
+          ? `${outerRingMeta.title} — ${outerRingMeta.summary}`
+          : 'Outer Ring layout — BASE fixed; other islands pushed to the rim.',
+      )
+    } else if (mode === 'world') {
       setNote(
         `Sparse ${WORLD_WIDTH}×${WORLD_HEIGHT} — solid = AABB; dashed lines = +6/+7/+8/+9 blit edge thresholds (not island bounds); cross = mapPtr origin.`,
       )
@@ -141,7 +182,16 @@ export function EditorPage() {
         `Dense atlas ${MAP_WIDTH}×${MAP_HEIGHT} at $9300 · scale ${scale}px · packed islands; world view applies F230 window mapping.`,
       )
     }
-  }, [map, mode, scale, focus, showWindows])
+  }, [
+    map,
+    mode,
+    scale,
+    focus,
+    showWindows,
+    worldMode,
+    outerRingWindows,
+    outerRingMeta,
+  ])
 
   const onCanvasMove = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
@@ -155,15 +205,19 @@ export function EditorPage() {
       setHover(`screen (${hit.localX},${hit.localY})`)
       return
     }
+    const windows =
+      mode === 'world-outer-ring' && outerRingWindows
+        ? outerRingWindows
+        : windowsForMap(map)
     const peek = peekAtlasUnderCursor(
       map,
       mode,
       hit.globalX,
       hit.globalY,
-      windowsForMap(map),
+      windows,
     )
     const cell = peek ? formatAtlasPeek(peek) : 'atlas —'
-    if (mode === 'world') {
+    if (worldMode) {
       setHover(
         `sector (${hit.sx},${hit.sy}) · local (${hit.localX},${hit.localY}) · global (${hit.globalX},${hit.globalY}) · ${cell}`,
       )
@@ -174,7 +228,7 @@ export function EditorPage() {
 
   const onCanvasClick = (e: React.MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current
-    if (!canvas || mode !== 'world') return
+    if (!canvas || !worldMode) return
     const hit = pickWorldCell(canvas, e.clientX, e.clientY, scale, mode)
     if (!hit) return
     setFocus({ sx: hit.sx, sy: hit.sy })
@@ -212,12 +266,13 @@ export function EditorPage() {
             onChange={(e) => setMode(e.target.value as MapViewMode)}
           >
             <option value="world">World 768×768 (sectors)</option>
+            <option value="world-outer-ring">World — Outer Ring</option>
             <option value="mmap">In-game M map</option>
             <option value="tile">Atlas 128×150 (packed)</option>
             <option value="overview">Overview-style atlas</option>
           </select>
         </label>
-        {mode === 'world' && (
+        {worldMode && (
           <label className="inline-flex items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
@@ -376,9 +431,9 @@ export function EditorPage() {
             aria-label="Cyclone world map"
             className="max-w-full cursor-crosshair border border-line bg-[#0b1c2c] [image-rendering:pixelated]"
             style={{
-              width: mode === 'world' ? 'min(100%, 768px)' : 'min(100%, 512px)',
+              width: worldMode ? 'min(100%, 768px)' : 'min(100%, 512px)',
               height: 'auto',
-              maxHeight: mode === 'world' ? undefined : '90vh',
+              maxHeight: worldMode ? undefined : '90vh',
             }}
             onMouseMove={onCanvasMove}
             onMouseLeave={() => setHover('—')}
