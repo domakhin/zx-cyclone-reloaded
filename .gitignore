@@ -23,6 +23,7 @@ public/roms/**
 !public/taps/**/*.tap
 !public/taps/**/*.TAP
 !public/jsspeccy/**/*.rom
+!public/jsspeccy/**/*.szx
 
 # Editor directories and files
 .vscode/*
